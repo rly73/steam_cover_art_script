@@ -49,8 +49,7 @@ class BoxArtApplication:
             data = {"steamid": 0, "apikey": 0, "target_path": ""}
             with open("var.pickle", "wb") as f:
                 pickle.dump(data, f)
-
-
+    
     def settings(self):
         top = tkinter.Toplevel()
         Settings(top)
@@ -60,6 +59,7 @@ class BoxArtApplication:
             with urllib.request.urlopen("http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + BoxArtApplication.apikey  + "&steamids=" + BoxArtApplication.steamid) as k:
                 jdata = json.loads(k.read().decode())
                 self.variable = int(jdata["response"]["players"][0]["gameid"])
+                print(int(jdata["response"]["players"][0]["gameid"]))
         except KeyError:
             tkinter.messagebox.showerror(title="Error",message="You need to be currently running a game on steam for this to work")
 
@@ -74,8 +74,15 @@ class BoxArtApplication:
                 break
         if id != 0:
             for file in os.listdir('/Program Files (x86)/Steam/appcache/librarycache'):
-                if fnmatch.fnmatch(file, id + '*600x900.jpg'): 
-                    shutil.copy(r'C:/Program Files (x86)/Steam/appcache/librarycache/'+file, BoxArtApplication.target_path)
+                if fnmatch.fnmatch(file, id + '*600x900.jpg'):
+                    if len(os.listdir(BoxArtApplication.target_path)) == 1:
+                        for f in os.listdir(BoxArtApplication.target_path):
+                            os.remove(os.path.join(BoxArtApplication.target_path,f))
+                        print("File Removed")
+                        shutil.copy(r'C:/Program Files (x86)/Steam/appcache/librarycache/'+file, BoxArtApplication.target_path)
+                    else:
+                        print("No file needed to remove")
+                        shutil.copy(r'C:/Program Files (x86)/Steam/appcache/librarycache/'+file, BoxArtApplication.target_path)
                     break
         else:
             tkinter.messagebox.showerror(title="Error",message="The program you selected is either not steam supported or you aren't currently playing a game")
@@ -107,10 +114,11 @@ class Settings:
              data = pickle.load(f)
 
          
+         
 
          tkinter.Label(top, text="SteamID64").grid(row=0)
          tkinter.Label(top, text="Steam API Key").grid(row=1)
-         tkinter.Label(top, text=data["target_path"],bg="white" ).grid(row=2, column=1)
+         tkinter.Label(top, text=data["target_path"][0:25],bg="white" ).grid(row=2, column=1)
 
          self.steamID = tkinter.Entry(top)
          self.steamID.insert(0, data["steamid"])
@@ -148,6 +156,8 @@ class Settings:
 root = tkinter.Tk()
 
 app = BoxArtApplication(root)
+
+
 
 root.mainloop()
 
