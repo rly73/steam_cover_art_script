@@ -17,6 +17,7 @@ class BoxArtApplication:
     def __init__(self, master):
         self.master = master
         master.title("Box Art App")
+        self.master.geometry("202x125")
         
         #GUI Configurations
         self.settingsFrame = tkinter.Frame(master,bg="#21242a")
@@ -30,10 +31,7 @@ class BoxArtApplication:
 
         self.refreshBtn = tkinter.Button(self.midFrame,bg="#3f444e" ,fg="white",text="Get Currently \nPlayed Game",command=self.refresh)   
         self.refreshBtn.pack(padx=5,pady=5,side=tkinter.LEFT,fill=tkinter.BOTH, expand=1)
-
-        self.directoryBtn = tkinter.Button(self.midFrame,bg="#3f444e",fg="white" ,text="Set Target \nDirectory",command=self.selectdirectory)
-        self.directoryBtn.pack(padx=5,pady=5,fill=tkinter.BOTH, expand=1 )
-
+        
         self.bottomframe = tkinter.Frame(master,bg="#21242a")
         self.bottomframe.pack(side=tkinter.BOTTOM,fill=tkinter.BOTH, expand=1)
   
@@ -52,6 +50,7 @@ class BoxArtApplication:
             with open("var.pickle", "wb") as f:
                 pickle.dump(data, f)
 
+
     def settings(self):
         top = tkinter.Toplevel()
         Settings(top)
@@ -63,16 +62,6 @@ class BoxArtApplication:
                 self.variable = int(jdata["response"]["players"][0]["gameid"])
         except KeyError:
             tkinter.messagebox.showerror(title="Error",message="You need to be currently running a game on steam for this to work")
-
-    def selectdirectory(self):
-        with open("var.pickle", "rb") as f:
-            data = pickle.load(f)
-
-        data["target_path"] = filedialog.askdirectory()
-        BoxArtApplication.target_path = data["target_path"]
-
-        with open("var.pickle", "wb")as f:
-            pickle.dump(data, f)
 
     def getgame(self):
         id = 0
@@ -105,18 +94,35 @@ class Settings:
      def __init__(self, top):
          self.top = top 
          self.top.title("Settings")
+         self.top.geometry("275x120")
+
+         top.columnconfigure(1, weight=1)
+         top.rowconfigure(1,weight=1)
+         top.columnconfigure(2, weight=1)
+         top.rowconfigure(2,weight=1)
+         top.columnconfigure(3, weight=1)
+         top.rowconfigure(3,weight=1)
+
+         with open("var.pickle", "rb") as f:
+             data = pickle.load(f)
+
+         
 
          tkinter.Label(top, text="SteamID64").grid(row=0)
          tkinter.Label(top, text="Steam API Key").grid(row=1)
+         tkinter.Label(top, text=data["target_path"],bg="white" ).grid(row=2, column=1)
 
          self.steamID = tkinter.Entry(top)
+         self.steamID.insert(0, data["steamid"])
          self.apiKey = tkinter.Entry(top)
+         self.apiKey.insert(0,data["apikey"])
 
          self.steamID.grid(row=0, column=1)
          self.apiKey.grid(row=1, column=1)
 
-         tkinter.Button(top, text="submit", command=self.submit).grid(row=2, column=1,sticky="nsew")
-
+         tkinter.Button(top, text="Apply", command=self.submit).grid(row=3, column=1,sticky="nsew")
+         tkinter.Button(top,text="Set Target \nDirectory",command=self.selectdirectory).grid(row=2,sticky="nsew")
+         
      def submit(self):
          with open("var.pickle", "rb") as f:
             data = pickle.load(f)
@@ -124,7 +130,21 @@ class Settings:
          data["apikey"] = self.apiKey.get()
          with open("var.pickle", "wb") as f:
             pickle.dump(data, f)
-         
+
+     def selectdirectory(self):
+         with open("var.pickle", "rb") as f:
+             data = pickle.load(f)
+        
+         data["target_path"] = filedialog.askdirectory()
+         BoxArtApplication.target_path = data["target_path"]
+
+         with open("var.pickle", "wb")as f:
+            pickle.dump(data, f)
+
+
+
+
+
 root = tkinter.Tk()
 
 app = BoxArtApplication(root)
