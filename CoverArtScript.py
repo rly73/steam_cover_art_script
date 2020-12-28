@@ -78,11 +78,18 @@ class BoxArtApplication:
                     if len(os.listdir(BoxArtApplication.target_path)) == 1:
                         for f in os.listdir(BoxArtApplication.target_path):
                             os.remove(os.path.join(BoxArtApplication.target_path,f))
+                            
                         print("File Removed")
                         shutil.copy(r'C:/Program Files (x86)/Steam/appcache/librarycache/'+file, BoxArtApplication.target_path)
+                        for f in os.listdir(BoxArtApplication.target_path):
+                            os.rename(os.path.join(BoxArtApplication.target_path,f),os.path.join(BoxArtApplication.target_path,'boxart.jpg'))
+                        
                     else:
                         print("No file needed to remove")
                         shutil.copy(r'C:/Program Files (x86)/Steam/appcache/librarycache/'+file, BoxArtApplication.target_path)
+                        for f in os.listdir(BoxArtApplication.target_path):
+                            os.rename(os.path.join(BoxArtApplication.target_path,f),os.path.join(BoxArtApplication.target_path,'boxart.jpg'))
+                        
                     break
         else:
             tkinter.messagebox.showerror(title="Error",message="The program you selected is either not steam supported or you aren't currently playing a game")
@@ -101,35 +108,60 @@ class Settings:
      def __init__(self, top):
          self.top = top 
          self.top.title("Settings")
-         self.top.geometry("275x120")
+         self.top.configure(bg="#21242a")
+         self.top.columnconfigure(0, weight=1)
+         self.top.columnconfigure(1, weight=4)
 
-         top.columnconfigure(1, weight=1)
-         top.rowconfigure(1,weight=1)
-         top.columnconfigure(2, weight=1)
-         top.rowconfigure(2,weight=1)
-         top.columnconfigure(3, weight=1)
-         top.rowconfigure(3,weight=1)
-
+         self.top.rowconfigure(0,weight=1)
+         self.top.rowconfigure(1,weight=1)
+         self.top.rowconfigure(2,weight=1)
+         self.top.rowconfigure(3,weight=1)
+         
+    
          with open("var.pickle", "rb") as f:
              data = pickle.load(f)
 
          
+         self.steam_id_label = tkinter.Label(top, text="SteamID64", fg="white",bg="#21242a")
+         self.steam_id_label.grid(row=0, column=0, sticky="W", ipadx=10, ipady=10,padx=10, pady=10)
+
+         self.steamID = tkinter.Entry(top, bg="#21242a", fg="white", justify='center' )
+         self.steamID.insert(0, data["steamid"])
+         self.steamID.grid(row=0, column=1, ipadx=10, ipady=10, sticky="NSEW", padx=10, pady=10)
+         self.steamID.config(highlightbackground="white")
+
+         self.api_key_label = tkinter.Label(top, text="Steam API Key", fg="white", bg="#21242a")
+         self.api_key_label.grid(row=1, column=0, sticky="W", ipadx=10, ipady=10,padx=10, pady=10)
+         
+         
+         self.apiKey = tkinter.Entry(top, bg="#21242a", fg="white", justify='center')
+         self.apiKey.insert(0,data["apikey"])
+         self.apiKey.grid(row=1, column=1, ipadx=10, ipady=10, sticky="NSEW", padx=10, pady=10)
+         self.apiKey.config(highlightbackground="white")
+              
+         self.frame = tkinter.Frame(top)
+         self.frame.grid(column=0, columnspan=2, row=2,sticky="NSEW")
+         
+         self.target_path_label = tkinter.Label(self.frame, text="   " + data["target_path"][0:50] + "...",bg="#21242a", anchor="w", fg="white")
+         self.target_path_label.grid(column=0, row=0, ipadx=15, ipady=10, sticky="NSEW", padx=10, pady=10)
+         self.target_path_label.config(highlightbackground="white")
+         
+         self.set_directory_btn = tkinter.Button(self.frame,text="Set Directory",command=self.selectdirectory, bg="#393f47", fg="white")
+         self.set_directory_btn.grid(column=1, row=0, ipadx=10, ipady=10, sticky="NSEW", padx=10, pady=10)
+         
+         self.frame.columnconfigure(0,weight=4)
+         self.frame.columnconfigure(1,weight=1)
+         self.frame.configure(bg="#21242a")
+         self.frame.rowconfigure(0,weight=1)
+
+         self.frame2 = tkinter.Frame(top, bg="#21242a")
+         self.frame2.grid(column=0, columnspan=2, row=3 , ipadx=10, ipady=10, sticky="NSEW",padx=10)
+
+         tkinter.Button(self.frame2, text="Saved", command=self.submit, width="12", height="2", bg="#393f47", fg="white").pack(side=tkinter.RIGHT)
+         self.visible = tkinter.Label(self.frame2, text="Applied", width="12", height="2", bg="#21242a", fg="white")
+         
          
 
-         tkinter.Label(top, text="SteamID64").grid(row=0)
-         tkinter.Label(top, text="Steam API Key").grid(row=1)
-         tkinter.Label(top, text=data["target_path"][0:25],bg="white" ).grid(row=2, column=1)
-
-         self.steamID = tkinter.Entry(top)
-         self.steamID.insert(0, data["steamid"])
-         self.apiKey = tkinter.Entry(top)
-         self.apiKey.insert(0,data["apikey"])
-
-         self.steamID.grid(row=0, column=1)
-         self.apiKey.grid(row=1, column=1)
-
-         tkinter.Button(top, text="Apply", command=self.submit).grid(row=3, column=1,sticky="nsew")
-         tkinter.Button(top,text="Set Target \nDirectory",command=self.selectdirectory).grid(row=2,sticky="nsew")
          
      def submit(self):
          with open("var.pickle", "rb") as f:
@@ -138,6 +170,7 @@ class Settings:
          data["apikey"] = self.apiKey.get()
          with open("var.pickle", "wb") as f:
             pickle.dump(data, f)
+         self.visible.pack(side=tkinter.RIGHT, padx=10)
 
      def selectdirectory(self):
          with open("var.pickle", "rb") as f:
@@ -150,21 +183,8 @@ class Settings:
             pickle.dump(data, f)
 
 
-
-
-
 root = tkinter.Tk()
 
 app = BoxArtApplication(root)
 
-
-
 root.mainloop()
-
-        
-
-        
-
-        
-
-        
