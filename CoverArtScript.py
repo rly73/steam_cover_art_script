@@ -17,26 +17,35 @@ class BoxArtApplication:
     def __init__(self, master):
         self.master = master
         master.title("Box Art App")
-        self.master.geometry("202x125")
+        self.master.geometry("202x160")
         
         #GUI Configurations
         self.settingsFrame = tkinter.Frame(master,bg="#21242a")
         self.settingsFrame.pack(side=tkinter.TOP,fill=tkinter.BOTH, expand=1)
 
+
         self.settingsBtn = tkinter.Button(self.settingsFrame,command=self.settings, fg="white", text="Settings", bg="#3e444e")
         self.settingsBtn.pack(padx=5,side=tkinter.RIGHT,fill=tkinter.Y)
+        
 
         self.midFrame = tkinter.Frame(master,bg="#21242a")
         self.midFrame.pack(side=tkinter.TOP,fill=tkinter.BOTH, expand=1)
 
         self.refreshBtn = tkinter.Button(self.midFrame,bg="#3f444e" ,fg="white",text="Get Currently \nPlayed Game",command=self.refresh)   
         self.refreshBtn.pack(padx=5,pady=5,side=tkinter.LEFT,fill=tkinter.BOTH, expand=1)
+
+        self.bottombottomframe = tkinter.Frame(master,bg="#21242a")
+        self.bottombottomframe.pack(side=tkinter.BOTTOM, fill=tkinter.BOTH, expand=1)
+        
+        self.notification = tkinter.Label(self.bottombottomframe, fg="white", bg="#21242a")
+        self.notification.pack(side=tkinter.RIGHT,fill=tkinter.Y, expand=1)
         
         self.bottomframe = tkinter.Frame(master,bg="#21242a")
         self.bottomframe.pack(side=tkinter.BOTTOM,fill=tkinter.BOTH, expand=1)
   
         self.runBtn = tkinter.Button(self.bottomframe ,bg="#1db34c",fg="white",text="Run",command=self.getgame)
         self.runBtn.pack(padx=5,pady=5,side=tkinter.LEFT,fill=tkinter.BOTH, expand=1)
+        
 
         #Load pickle variables
         try:
@@ -60,6 +69,8 @@ class BoxArtApplication:
                 jdata = json.loads(k.read().decode())
                 self.variable = int(jdata["response"]["players"][0]["gameid"])
                 print(int(jdata["response"]["players"][0]["gameid"]))
+                self.notification.configure(text=" Game Gotten")
+                self.notification.after(5000, lambda: self.notification.configure(text=" "))
         except KeyError:
             tkinter.messagebox.showerror(title="Error",message="You need to be currently running a game on steam for this to work")
 
@@ -89,7 +100,9 @@ class BoxArtApplication:
                         shutil.copy(r'C:/Program Files (x86)/Steam/appcache/librarycache/'+file, BoxArtApplication.target_path)
                         for f in os.listdir(BoxArtApplication.target_path):
                             os.rename(os.path.join(BoxArtApplication.target_path,f),os.path.join(BoxArtApplication.target_path,'boxart.jpg'))
-                        
+
+                    self.notification.configure(text="Cover Art Successful")
+                    self.notification.after(10000, lambda: self.notification.configure(text=" "))
                     break
         else:
             tkinter.messagebox.showerror(title="Error",message="The program you selected is either not steam supported or you aren't currently playing a game")
@@ -157,8 +170,8 @@ class Settings:
          self.frame2 = tkinter.Frame(top, bg="#21242a")
          self.frame2.grid(column=0, columnspan=2, row=3 , ipadx=10, ipady=10, sticky="NSEW",padx=10)
 
-         tkinter.Button(self.frame2, text="Saved", command=self.submit, width="12", height="2", bg="#393f47", fg="white").pack(side=tkinter.RIGHT)
-         self.visible = tkinter.Label(self.frame2, text="Applied", width="12", height="2", bg="#21242a", fg="white")
+         tkinter.Button(self.frame2, text="Apply", command=self.submit, width="12", height="2", bg="#393f47", fg="white").pack(side=tkinter.RIGHT)
+         self.visible = tkinter.Label(self.frame2, text="Saved", width="12", height="2", bg="#21242a", fg="white")
          
          
 
